@@ -21,7 +21,7 @@ Vamos a la carpeta /opt/ y clonamos tu proyecto (cambia la URL con la
 tuya real de GitHub que acabarás de crear):
 
 cd /opt
-git clone https://github.com/TU_USUARIO/DashVentasAno.git DashVentasAno
+git clone https://github.com/sebastianherrara91-bot/dashvsano.git DashVentasAno
 cd DashVentasAno
 
 -------------------------------------------------------------------
