@@ -16,7 +16,7 @@ load_dotenv()
 
 app = FastAPI(title="INCOTEXCO Dashboard API", version="1.1")
 
-# Habilitar CORS para permitir peticiones desde el index.html alojado en GoDaddy
+# Habilitar CORS (si se requiere para desarrollo externo)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Cambiar por ["https://tudominio.com"] en producción
