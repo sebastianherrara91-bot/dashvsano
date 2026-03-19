@@ -713,11 +713,13 @@ function switchTab(tab) {
   if (tab === 'db') loadMarcas();
 }
 
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'http://186.31.65.250:9091';
+
 var marcasLoaded = false;
 function loadMarcas() {
   if (marcasLoaded) return;
   var sel = document.getElementById('dbMarca');
-  fetch('/api/marcas')
+  fetch(API_BASE + '/api/marcas')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       sel.innerHTML = '<option value="">-- Seleccionar marca --</option>';
@@ -765,7 +767,7 @@ async function queryDB() {
   st.textContent = 'Conectando a PostgreSQL...';
 
   try {
-    var url = '/api/consultar?marca=' + encodeURIComponent(marca) +
+    var url = API_BASE + '/api/consultar?marca=' + encodeURIComponent(marca) +
       '&fecha_inicio_prev=' + pi + '&fecha_fin_prev=' + pf +
       '&fecha_inicio_curr=' + ci + '&fecha_fin_curr=' + cf;
     var resp = await fetch(url);
