@@ -187,11 +187,40 @@ def get_marcas(ini_cliente: str = Query(default="FL")):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── Endpoint: tipos de programa ───────────────────────────────────────────────
+@app.get("/api/tipos_programa")
+def get_tipos_programa(marca: str = Query(...), ini_cliente: str = Query(default="FL")):
+    """Devuelve los tipos de programa disponibles para una marca en la fecha más reciente."""
+    sql = """
+    SELECT DISTINCT M.tipo AS tipo
+    FROM dbo.dwh_stock AS ST
+    LEFT JOIN dbo.cat_sku AS EC ON ST.ean = EC.ean
+    LEFT JOIN dbo.marca_subclase AS MS
+        ON ST.ini_cliente = MS.ini_cliente
+        AND substring(EC.categoria from 1 for 7) = MS.subcategoria
+    LEFT JOIN dbo.marca AS MA ON EC.marca = MA.marca_bd
+    LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
+    WHERE ST.ini_cliente = %(ini_cliente)s
+      AND COALESCE(MS.marca, MA.new_marca, EC.marca) = %(marca)s
+      AND M.tipo IS NOT NULL
+      AND ST.fecha = (SELECT MAX(fecha) FROM dbo.dwh_stock WHERE ini_cliente = %(ini_cliente)s)
+    ORDER BY 1
+    """
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, {"ini_cliente": ini_cliente, "marca": marca})
+                rows = cur.fetchall()
+        return {"tipos": [r[0] for r in rows if r[0]]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # ── Endpoint: consultar datos ─────────────────────────────────────────────────
 @app.get("/api/consultar")
 def consultar(
     marca: str = Query(..., description="Nombre de la marca"),
+    tipo_programa: str = Query(default="PROGRAMA", description="Tipo de programa (o TODOS)"),
     fecha_inicio_prev: str = Query(..., description="YYYY-MM-DD inicio año anterior"),
     fecha_fin_prev: str = Query(..., description="YYYY-MM-DD fin año anterior"),
     fecha_inicio_curr: str = Query(..., description="YYYY-MM-DD inicio año actual"),
@@ -219,8 +248,11 @@ def consultar(
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute(QUERY_DATA, params)
                 rows = cur.fetchall()
-        # Filter by marca and drop nulls
-        filtered = [r for r in rows if r.get("Marca") == marca]
+        # Filter by marca and tipo_programa
+        if tipo_programa == "TODOS":
+            filtered = [r for r in rows if r.get("Marca") == marca]
+        else:
+            filtered = [r for r in rows if r.get("Marca") == marca and r.get("Tipo_Programa") == tipo_programa]
         # Serialize dates and Decimals
         for r in filtered:
             for k, v in r.items():

@@ -215,8 +215,12 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
   <div id="panelDB" style="display:none">
     <div class="form-group">
       <label>Marca</label>
-      <select class="form-select" id="dbMarca"><option value="">Cargando marcas...</option></select>
+      <select class="form-select" id="dbMarca" onchange="loadTiposPrograma()"><option value="">Cargando marcas...</option></select>
       <div class="form-hint">Marcas con stock &ge; 800 und en la &uacute;ltima fecha disponible</div>
+    </div>
+    <div class="form-group">
+      <label>Tipo Programa</label>
+      <select class="form-select" id="dbTipoPrograma" disabled><option value="">-- Seleccione Marca --</option></select>
     </div>
     <div class="form-group">
       <label>A&ntilde;o Anterior</label>
@@ -737,6 +741,35 @@ function loadMarcas() {
     });
 }
 
+function loadTiposPrograma() {
+  var marca = document.getElementById('dbMarca').value;
+  var selTP = document.getElementById('dbTipoPrograma');
+  if (!marca) {
+    selTP.innerHTML = '<option value="">-- Seleccione Marca --</option>';
+    selTP.disabled = true;
+    return;
+  }
+  selTP.innerHTML = '<option value="">Cargando...</option>';
+  selTP.disabled = true;
+  fetch(API_BASE + '/api/tipos_programa?marca=' + encodeURIComponent(marca))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      selTP.innerHTML = '<option value="TODOS">TODOS</option>';
+      var hasPrograma = false;
+      (data.tipos || []).forEach(function(tp) {
+        if (tp === 'PROGRAMA') hasPrograma = true;
+        selTP.innerHTML += '<option value="' + tp + '">' + tp + '</option>';
+      });
+      if (hasPrograma) {
+        selTP.value = 'PROGRAMA';
+      }
+      selTP.disabled = false;
+    })
+    .catch(function(e) {
+      selTP.innerHTML = '<option value="">Error cargando tipos</option>';
+    });
+}
+
 function setDefaultDates() {
   var now = new Date();
   var y = now.getFullYear();
@@ -752,6 +785,7 @@ function setDefaultDates() {
 
 async function queryDB() {
   var marca = document.getElementById('dbMarca').value;
+  var tipo_prog = document.getElementById('dbTipoPrograma').value || 'PROGRAMA';
   if (!marca) { alert('Selecciona una marca'); return; }
   var pi = document.getElementById('dbPrevInicio').value;
   var pf = document.getElementById('dbPrevFin').value;
@@ -768,6 +802,7 @@ async function queryDB() {
 
   try {
     var url = API_BASE + '/api/consultar?marca=' + encodeURIComponent(marca) +
+      '&tipo_programa=' + encodeURIComponent(tipo_prog) +
       '&fecha_inicio_prev=' + pi + '&fecha_fin_prev=' + pf +
       '&fecha_inicio_curr=' + ci + '&fecha_fin_curr=' + cf;
     var resp = await fetch(url);
