@@ -38,3 +38,7 @@ Thumbs.db
 
 # Instrucciones
 INSTRUCCIONES_PROXMOX.txt
+
+# Scripts de prueba y benchmarking temporales
+bench*.py
+test_*.py
