@@ -42,3 +42,4 @@ INSTRUCCIONES_PROXMOX.txt
 # Scripts de prueba y benchmarking temporales
 bench*.py
 test_*.py
+result.txt

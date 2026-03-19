@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
 import os, datetime
+import concurrent.futures
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -280,8 +281,12 @@ def consultar(
         return rows
 
     try:
-        data_prev = run_query(fi_prev, ff_prev)
-        data_curr = run_query(fi_curr, ff_curr)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            future_prev = executor.submit(run_query, fi_prev, ff_prev)
+            future_curr = executor.submit(run_query, fi_curr, ff_curr)
+            
+            data_prev = future_prev.result()
+            data_curr = future_curr.result()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error de consulta: {str(e)}")
 
