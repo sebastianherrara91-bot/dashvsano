@@ -35,3 +35,6 @@ wheels/
 # Archivos de SO
 .DS_Store
 Thumbs.db
+
+# Instrucciones
+INSTRUCCIONES_PROXMOX.txt
