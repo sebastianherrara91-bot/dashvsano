@@ -193,17 +193,17 @@ def get_tipos_programa(marca: str = Query(...), ini_cliente: str = Query(default
     """Devuelve los tipos de programa disponibles para una marca en la fecha más reciente."""
     sql = """
     SELECT DISTINCT M.tipo AS tipo
-    FROM dbo.dwh_stock AS ST
-    LEFT JOIN dbo.cat_sku AS EC ON ST.ean = EC.ean
-    LEFT JOIN dbo.marca_subclase AS MS
-        ON ST.ini_cliente = MS.ini_cliente
-        AND substring(EC.categoria from 1 for 7) = MS.subcategoria
-    LEFT JOIN dbo.marca AS MA ON EC.marca = MA.marca_bd
-    LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
-    WHERE ST.ini_cliente = %(ini_cliente)s
-      AND COALESCE(MS.marca, MA.new_marca, EC.marca) = %(marca)s
-      AND M.tipo IS NOT NULL
-      AND ST.fecha = (SELECT MAX(fecha) FROM dbo.dwh_stock WHERE ini_cliente = %(ini_cliente)s)
+    FROM dbo.monitoreo M
+    WHERE M.tipo IS NOT NULL
+      AND EXISTS (
+          SELECT 1 
+          FROM dbo.cat_sku EC
+          LEFT JOIN dbo.marca_subclase MS ON substring(EC.categoria from 1 for 7) = MS.subcategoria AND MS.ini_cliente = %(ini_cliente)s
+          LEFT JOIN dbo.marca MA ON EC.marca = MA.marca_bd
+          WHERE EC.ref_modelo = M.modelo 
+            AND EC.marca = M.marca
+            AND COALESCE(MS.marca, MA.new_marca, EC.marca) = %(marca)s
+      )
     ORDER BY 1
     """
     try:
@@ -243,18 +243,35 @@ def consultar(
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
             "stock_threshold": stock_threshold,
+            "marca": marca,
+            "tipo_programa": tipo_programa
         }
+        
+        # Inyectar filtros en la consulta SQL dinámicamente para lograr máxima velocidad
+        sql = QUERY_DATA
+        marca_filter = " AND COALESCE(MS.marca, MA.new_marca, EC.marca) = %(marca)s "
+        tipo_filter = "" if tipo_programa == "TODOS" else " AND M.tipo = %(tipo_programa)s "
+        
+        sql = sql.replace(
+            "AND ST.fecha = (SELECT MAX(fecha) FROM dbo.dwh_stock WHERE ini_cliente = %(ini_cliente)s AND fecha <= %(fecha_fin)s)",
+            "AND ST.fecha = (SELECT MAX(fecha) FROM dbo.dwh_stock WHERE ini_cliente = %(ini_cliente)s AND fecha <= %(fecha_fin)s)\n      " + marca_filter
+        )
+        sql = sql.replace(
+            "AND ST.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s",
+            "AND ST.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s\n      " + marca_filter + tipo_filter
+        )
+        sql = sql.replace(
+            "AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s",
+            "AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s\n      " + marca_filter + tipo_filter
+        )
+
         with get_conn() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute(QUERY_DATA, params)
+                cur.execute(sql, params)
                 rows = cur.fetchall()
-        # Filter by marca and tipo_programa
-        if tipo_programa == "TODOS":
-            filtered = [r for r in rows if r.get("Marca") == marca]
-        else:
-            filtered = [r for r in rows if r.get("Marca") == marca and r.get("Tipo_Programa") == tipo_programa]
+
         # Serialize dates and Decimals
-        for r in filtered:
+        for r in rows:
             for k, v in r.items():
                 if isinstance(v, (datetime.date, datetime.datetime)):
                     r[k] = v.isoformat()
