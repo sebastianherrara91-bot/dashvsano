@@ -277,7 +277,7 @@ def consultar(
                     r[k] = v.isoformat()
                 elif hasattr(v, "as_integer_ratio"):  # Decimal
                     r[k] = float(v)
-        return filtered
+        return rows
 
     try:
         data_prev = run_query(fi_prev, ff_prev)
