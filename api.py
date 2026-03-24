@@ -4,7 +4,7 @@ FastAPI + PostgreSQL (DWH_INCO)
 """
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
@@ -266,19 +266,19 @@ def consultar(
             "AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s\n      " + marca_filter + tipo_filter
         )
 
-        with get_conn() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute(sql, params)
-                rows = cur.fetchall()
+        final_sql = f"""
+        WITH raw_data AS (
+            {sql}
+        )
+        SELECT COALESCE(json_agg(row_to_json(raw_data))::text, '[]') FROM raw_data
+        """
 
-        # Serialize dates and Decimals
-        for r in rows:
-            for k, v in r.items():
-                if isinstance(v, (datetime.date, datetime.datetime)):
-                    r[k] = v.isoformat()
-                elif hasattr(v, "as_integer_ratio"):  # Decimal
-                    r[k] = float(v)
-        return rows
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(final_sql, params)
+                json_str = cur.fetchone()[0]
+
+        return json_str
 
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -290,13 +290,11 @@ def consultar(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error de consulta: {str(e)}")
 
-    return {
-        "prev": data_prev,
-        "curr": data_curr,
-        "marca": marca,
-        "rows_prev": len(data_prev),
-        "rows_curr": len(data_curr),
-    }
+    # Build direct JSON response bypassing Python serialization overhead completely
+    return Response(
+        content='{"prev":' + data_prev + ',"curr":' + data_curr + ',"marca":"' + marca + '"}',
+        media_type="application/json"
+    )
 
 
 # ── Servir index.html ─────────────────────────────────────────────────────────
