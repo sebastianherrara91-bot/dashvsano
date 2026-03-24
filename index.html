@@ -229,15 +229,15 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
     <div class="form-group">
       <label>A&ntilde;o Anterior</label>
       <div class="form-row">
-        <input type="date" class="form-input" id="dbPrevInicio">
-        <input type="date" class="form-input" id="dbPrevFin">
+        <input type="week" class="form-input" id="dbPrevInicio">
+        <input type="week" class="form-input" id="dbPrevFin">
       </div>
     </div>
     <div class="form-group">
       <label>A&ntilde;o Actual</label>
       <div class="form-row">
-        <input type="date" class="form-input" id="dbCurrInicio">
-        <input type="date" class="form-input" id="dbCurrFin">
+        <input type="week" class="form-input" id="dbCurrInicio">
+        <input type="week" class="form-input" id="dbCurrFin">
       </div>
     </div>
     <div class="db-status" id="dbStatus"></div>
@@ -774,34 +774,62 @@ function loadTiposPrograma() {
     });
 }
 
+function getWeekString(d) {
+  var dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  dt.setUTCDate(dt.getUTCDate() + 4 - (dt.getUTCDay() || 7));
+  var yearStart = new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  var weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1)/7);
+  return dt.getUTCFullYear() + '-W' + (weekNo < 10 ? '0' : '') + weekNo;
+}
+
+function weekToDate(weekStr, weekday) {
+  var parts = weekStr.split('-W');
+  var year = parseInt(parts[0], 10);
+  var week = parseInt(parts[1], 10);
+  var d = new Date(year, 0, 4);
+  d.setDate(d.getDate() - (d.getDay() || 7) + 1 + (week - 1) * 7 + (weekday - 1));
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
 function setDefaultDates() {
   var now = new Date();
   
-  // Año actual: Últimos 7 días
-  document.getElementById('dbCurrFin').value = now.toISOString().slice(0, 10);
-  var currStart = new Date(now);
-  currStart.setDate(currStart.getDate() - 7);
-  document.getElementById('dbCurrInicio').value = currStart.toISOString().slice(0, 10);
+  // Año actual: Última semana registrada
+  var currEndWeek = getWeekString(now);
+  document.getElementById('dbCurrFin').value = currEndWeek;
   
-  // Año anterior: Mismo rango hace exactamente 1 año
-  var prevEnd = new Date(now);
-  prevEnd.setFullYear(prevEnd.getFullYear() - 1);
-  document.getElementById('dbPrevFin').value = prevEnd.toISOString().slice(0, 10);
+  // Rango 8 semanas hacia atrás
+  var startCurr = new Date(now);
+  startCurr.setDate(startCurr.getDate() - 7 * 8);
+  var currStartWeek = getWeekString(startCurr);
+  document.getElementById('dbCurrInicio').value = currStartWeek;
   
-  var prevStart = new Date(currStart);
-  prevStart.setFullYear(prevStart.getFullYear() - 1);
-  document.getElementById('dbPrevInicio').value = prevStart.toISOString().slice(0, 10);
+  // Año anterior: Misma semana, año pasado (comparación Yo Y precisa)
+  var partsEnd = currEndWeek.split('-W');
+  document.getElementById('dbPrevFin').value = (parseInt(partsEnd[0], 10) - 1) + '-W' + partsEnd[1];
+  
+  var partsStart = currStartWeek.split('-W');
+  document.getElementById('dbPrevInicio').value = (parseInt(partsStart[0], 10) - 1) + '-W' + partsStart[1];
 }
 
 async function queryDB() {
   var marca = document.getElementById('dbMarca').value;
   var tipo_prog = document.getElementById('dbTipoPrograma').value || 'PROGRAMA';
   if (!marca) { alert('Selecciona una marca'); return; }
-  var pi = document.getElementById('dbPrevInicio').value;
-  var pf = document.getElementById('dbPrevFin').value;
-  var ci = document.getElementById('dbCurrInicio').value;
-  var cf = document.getElementById('dbCurrFin').value;
-  if (!pi || !pf || !ci || !cf) { alert('Completa todas las fechas'); return; }
+  var pi_week = document.getElementById('dbPrevInicio').value;
+  var pf_week = document.getElementById('dbPrevFin').value;
+  var ci_week = document.getElementById('dbCurrInicio').value;
+  var cf_week = document.getElementById('dbCurrFin').value;
+  if (!pi_week || !pf_week || !ci_week || !cf_week) { alert('Completa todas las semanas'); return; }
+
+  // Convertir las semanas al Lunes (día 1) y Domingo (día 7) para el Backend
+  var pi = weekToDate(pi_week, 1);
+  var pf = weekToDate(pf_week, 7);
+  var ci = weekToDate(ci_week, 1);
+  var cf = weekToDate(cf_week, 7);
 
   var btn = document.getElementById('btnQuery');
   var st = document.getElementById('dbStatus');
