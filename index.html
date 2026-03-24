@@ -175,44 +175,17 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
   <h1>INCOTEXCO</h1>
   <p>Ventas e Inventario por Tienda &middot; Comparativo Interanual &middot; Red Falabella Colombia</p>
   <p id="brandLabel" style="display:none;margin-top:8px;font-size:15px;font-weight:600;color:var(--accent);font-family:var(--font-mono);letter-spacing:.5px"></p>
-  <a class="upload-link" id="reloadLink" style="display:none" onclick="showUpload()">Cargar Archivos</a>
+  <a class="upload-link" id="reloadLink" style="display:none" onclick="showUpload()">Modificar Filtros</a>
 </header>
 
 <!-- Upload screen (visible by default) -->
 <div id="uploadScreen" style="max-width:520px;margin:0 auto;padding:40px 0">
   <div style="text-align:center;margin-bottom:32px">
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">Bienvenido</h2>
-    <p style="color:var(--text2);font-size:14px">Genera el dashboard comparativo cargando archivos Excel o consultando directamente la base de datos.</p>
+    <p style="color:var(--text2);font-size:14px">Seleccione la marca y el rango de semanas para generar el dashboard.</p>
   </div>
 
-  <div class="source-tabs">
-    <button class="source-tab active" id="tabExcel" onclick="switchTab('excel')">Cargar Excel</button>
-    <button class="source-tab" id="tabDB" onclick="switchTab('db')">Consultar BD</button>
-  </div>
-
-  <!-- Tab: Excel -->
-  <div id="panelExcel">
-    <div class="upload-group">
-      <label>A&ntilde;o Anterior</label>
-      <div class="upload-zone" id="zone_prev" onclick="document.getElementById('file_prev').click()">
-        <input type="file" id="file_prev" accept=".xlsx,.xls" onchange="onFileSelect('prev',this)">
-        <div class="uz-icon">&#128196;</div>
-        <div class="uz-text" id="txt_prev">Click o arrastra archivo aqu&iacute;</div>
-      </div>
-    </div>
-    <div class="upload-group">
-      <label>A&ntilde;o Actual</label>
-      <div class="upload-zone" id="zone_curr" onclick="document.getElementById('file_curr').click()">
-        <input type="file" id="file_curr" accept=".xlsx,.xls" onchange="onFileSelect('curr',this)">
-        <div class="uz-icon">&#128196;</div>
-        <div class="uz-text" id="txt_curr">Click o arrastra archivo aqu&iacute;</div>
-      </div>
-    </div>
-    <button class="btn-process" id="btnProcess" disabled onclick="processFiles()">Generar Dashboard</button>
-  </div>
-
-  <!-- Tab: Base de Datos -->
-  <div id="panelDB" style="display:none">
+  <div id="panelDB">
     <div class="form-row" style="margin-bottom:4px">
       <div class="form-group" style="margin-bottom:0">
         <label>Marca</label>
@@ -308,7 +281,6 @@ var selectedWeeks = [];
 var globalVentasChart = null, globalStockChart = null;
 var storeCharts = {};
 var currentSort = {col: 'v25', dir: 'desc'};
-var uploadedFiles = {prev: null, curr: null};
 var yearLabels = {prev: 'Año Anterior', curr: 'Año Actual'};
 var viewMode = 'units'; // 'units' or 'money'
 
@@ -331,75 +303,16 @@ function showUpload() {
   document.getElementById('reloadLink').style.display = 'none';
 }
 
-['prev','curr'].forEach(function(key) {
-  var zone = document.getElementById('zone_' + key);
-  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
-  zone.addEventListener('drop', function(e) {
-    e.preventDefault(); zone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-      var inp = document.getElementById('file_' + key);
-      inp.files = e.dataTransfer.files;
-      onFileSelect(key, inp);
-    }
-  });
-});
-
-function onFileSelect(key, input) {
-  var file = input.files[0];
-  if (!file) return;
-  uploadedFiles[key] = file;
-  document.getElementById('zone_' + key).classList.add('loaded');
-  var txt = document.getElementById('txt_' + key);
-  txt.className = 'uz-file';
-  txt.textContent = file.name;
-  checkReady();
-}
-function checkReady() { document.getElementById('btnProcess').disabled = !(uploadedFiles.prev && uploadedFiles.curr); }
-
 // ============================================================
-//  FILE PROCESSING
+//  DATA PROCESSING
 // ============================================================
-function readFile(file) {
-  return new Promise(function(res, rej) {
-    var r = new FileReader();
-    r.onload = function(e) { res(new Uint8Array(e.target.result)); };
-    r.onerror = rej;
-    r.readAsArrayBuffer(file);
-  });
-}
-function parseExcel(data) {
-  var wb = XLSX.read(data, {type:'array'});
-  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:0});
-}
 function extractWeekNum(s) {
   if (!s || typeof s !== 'string') return -1;
   var p = s.split('/');
   return p.length < 2 ? -1 : parseInt(p[1].split(' ')[0], 10);
 }
 
-function processData(rowsPrev, rowsCurr) {
-  // Brand validation per file
-  function getBrands(rows) {
-    var b = {};
-    rows.forEach(function(r) { var m = (r.Marca || r.marca || '').toString().trim(); if (m) b[m] = true; });
-    return Object.keys(b);
-  }
-  var brandsPrev = getBrands(rowsPrev), brandsCurr = getBrands(rowsCurr);
-  if (brandsPrev.length > 1) {
-    alert('Error: El archivo del a\u00F1o anterior contiene m\u00FAltiples marcas (' + brandsPrev.join(', ') + '). Cada archivo debe contener una sola marca.');
-    return null;
-  }
-  if (brandsCurr.length > 1) {
-    alert('Error: El archivo del a\u00F1o actual contiene m\u00FAltiples marcas (' + brandsCurr.join(', ') + '). Cada archivo debe contener una sola marca.');
-    return null;
-  }
-  var brandPrev = brandsPrev[0] || 'N/A', brandCurr = brandsCurr[0] || 'N/A';
-  if (brandPrev !== brandCurr) {
-    alert('Error: Las marcas no coinciden. El a\u00F1o anterior tiene "' + brandPrev + '" y el a\u00F1o actual tiene "' + brandCurr + '". Ambos archivos deben ser de la misma marca.');
-    return null;
-  }
-  var brandName = brandCurr;
+function processData(rowsPrev, rowsCurr, brandName) {
 
   function getWeeks(rows) {
     var map = {};
@@ -472,35 +385,7 @@ function processData(rowsPrev, rowsCurr) {
   return {week_labels:weekLabels, stores:stores, global:{v25:gv25,v26:gv26,st25:gs25,st26:gs26,vd25:gvd25,vd26:gvd26}, store_order:storeNames, brand:brandName};
 }
 
-async function processFiles() {
-  var btn = document.getElementById('btnProcess');
-  btn.innerHTML = '<span class="spinner"></span>Procesando...';
-  btn.disabled = true;
-  try {
-    var dp = await readFile(uploadedFiles.prev), dc = await readFile(uploadedFiles.curr);
-    // Check if both files are identical
-    if (dp.length === dc.length) {
-      var same = true;
-      for (var j = 0; j < dp.length; j++) { if (dp[j] !== dc[j]) { same = false; break; } }
-      if (same) { alert('Los dos archivos son id\u00E9nticos. Debes cargar un archivo diferente para cada a\u00F1o.'); btn.textContent='Generar Dashboard'; btn.disabled=false; return; }
-    }
-    var rp = parseExcel(dp), rc = parseExcel(dc);
-    var result = processData(rp, rc);
-    if (!result) { btn.textContent='Generar Dashboard'; btn.disabled=false; return; }
-    D = result;
-    selectedWeeks = []; for (var i=0;i<D.week_labels.length;i++) selectedWeeks.push(i);
-    currentSort = {col:'v25', dir:'desc'};
-    document.getElementById('legendPrev').textContent = yearLabels.prev;
-    document.getElementById('legendCurr').textContent = yearLabels.curr;
-    var bl = document.getElementById('brandLabel');
-    bl.textContent = 'Marca: ' + D.brand; bl.style.display = 'block';
-    document.getElementById('uploadScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    document.getElementById('reloadLink').style.display = '';
-    renderWeekButtons(); updateAll();
-  } catch(e) { alert('Error: ' + e.message); console.error(e); }
-  btn.textContent = 'Generar Dashboard'; btn.disabled = false;
-}
+
 
 // ============================================================
 //  DASHBOARD
@@ -725,13 +610,7 @@ function buildStoreCards() {
 // ============================================================
 //  TAB SWITCHING & DB QUERY
 // ============================================================
-function switchTab(tab) {
-  document.getElementById('tabExcel').className = 'source-tab' + (tab === 'excel' ? ' active' : '');
-  document.getElementById('tabDB').className = 'source-tab' + (tab === 'db' ? ' active' : '');
-  document.getElementById('panelExcel').style.display = tab === 'excel' ? 'block' : 'none';
-  document.getElementById('panelDB').style.display = tab === 'db' ? 'block' : 'none';
-  if (tab === 'db') loadMarcas();
-}
+window.onload = loadMarcas;
 
 const API_BASE = '';
 
@@ -813,9 +692,9 @@ function setDefaultDates() {
   var currEndWeek = getWeekString(now);
   document.getElementById('dbCurrFin').value = currEndWeek;
   
-  // Rango 8 semanas hacia atrás
+  // Rango 12 semanas hacia atrás
   var startCurr = new Date(now);
-  startCurr.setDate(startCurr.getDate() - 7 * 8);
+  startCurr.setDate(startCurr.getDate() - 7 * 12);
   var currStartWeek = getWeekString(startCurr);
   document.getElementById('dbCurrInicio').value = currStartWeek;
   
@@ -896,7 +775,7 @@ async function queryDB() {
     }
 
     // Feed into same processData pipeline
-    var result = processData(data.prev, data.curr);
+    var result = processData(data.prev, data.curr, data.marca);
     if (!result) { btn.textContent = 'Consultar Base de Datos'; btn.disabled = false; return; }
     D = result;
     selectedWeeks = []; for (var i = 0; i < D.week_labels.length; i++) selectedWeeks.push(i);
