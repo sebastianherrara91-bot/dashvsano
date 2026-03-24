@@ -776,15 +776,21 @@ function loadTiposPrograma() {
 
 function setDefaultDates() {
   var now = new Date();
-  var y = now.getFullYear();
-  // Año actual: Jan 1 to today
-  document.getElementById('dbCurrInicio').value = y + '-01-01';
+  
+  // Año actual: Últimos 7 días
   document.getElementById('dbCurrFin').value = now.toISOString().slice(0, 10);
-  // Año anterior: same range last year
-  document.getElementById('dbPrevInicio').value = (y - 1) + '-01-01';
+  var currStart = new Date(now);
+  currStart.setDate(currStart.getDate() - 7);
+  document.getElementById('dbCurrInicio').value = currStart.toISOString().slice(0, 10);
+  
+  // Año anterior: Mismo rango hace exactamente 1 año
   var prevEnd = new Date(now);
-  prevEnd.setFullYear(y - 1);
+  prevEnd.setFullYear(prevEnd.getFullYear() - 1);
   document.getElementById('dbPrevFin').value = prevEnd.toISOString().slice(0, 10);
+  
+  var prevStart = new Date(currStart);
+  prevStart.setFullYear(prevStart.getFullYear() - 1);
+  document.getElementById('dbPrevInicio').value = prevStart.toISOString().slice(0, 10);
 }
 
 async function queryDB() {
