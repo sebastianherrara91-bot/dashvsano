@@ -49,7 +49,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0c0f14;--surface:#151921;--surface2:#1c2230;--border:#2a3040;--text:#e8ecf4;--text2:#8a94a8;--accent:#4f8cff;--chart-25:#fb923c;--chart-26:#4f8cff;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--font-main:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--font-mono:'SF Mono','Cascadia Code','Consolas','Menlo',monospace}
-body{font-family:var(--font-main);background:var(--bg);color:var(--text);line-height:1.5}
+body{font-family:var(--font-main);background:var(--bg);color:var(--text);line-height:1.5;color-scheme:dark}
 .container{max-width:1400px;margin:0 auto;padding:24px}
 header{text-align:center;padding:40px 0 30px;border-bottom:1px solid var(--border);margin-bottom:32px;position:relative}
 header h1{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
@@ -229,15 +229,27 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
     <div class="form-group">
       <label>A&ntilde;o Anterior</label>
       <div class="form-row">
-        <input type="week" class="form-input" id="dbPrevInicio">
-        <input type="week" class="form-input" id="dbPrevFin">
+        <div>
+          <input type="week" class="form-input" id="dbPrevInicio" onchange="updateWeekLabels()">
+          <div class="form-hint" id="lblPrevInicio" style="margin-top:6px; text-align:center; color:var(--accent); font-weight:600; font-family:var(--font-mono); letter-spacing:0.5px;"></div>
+        </div>
+        <div>
+          <input type="week" class="form-input" id="dbPrevFin" onchange="updateWeekLabels()">
+          <div class="form-hint" id="lblPrevFin" style="margin-top:6px; text-align:center; color:var(--accent); font-weight:600; font-family:var(--font-mono); letter-spacing:0.5px;"></div>
+        </div>
       </div>
     </div>
     <div class="form-group">
       <label>A&ntilde;o Actual</label>
       <div class="form-row">
-        <input type="week" class="form-input" id="dbCurrInicio">
-        <input type="week" class="form-input" id="dbCurrFin">
+        <div>
+          <input type="week" class="form-input" id="dbCurrInicio" onchange="updateWeekLabels()">
+          <div class="form-hint" id="lblCurrInicio" style="margin-top:6px; text-align:center; color:var(--accent); font-weight:600; font-family:var(--font-mono); letter-spacing:0.5px;"></div>
+        </div>
+        <div>
+          <input type="week" class="form-input" id="dbCurrFin" onchange="updateWeekLabels()">
+          <div class="form-hint" id="lblCurrFin" style="margin-top:6px; text-align:center; color:var(--accent); font-weight:600; font-family:var(--font-mono); letter-spacing:0.5px;"></div>
+        </div>
       </div>
     </div>
     <div class="db-status" id="dbStatus"></div>
@@ -813,6 +825,27 @@ function setDefaultDates() {
   
   var partsStart = currStartWeek.split('-W');
   document.getElementById('dbPrevInicio').value = (parseInt(partsStart[0], 10) - 1) + '-W' + partsStart[1];
+  
+  updateWeekLabels();
+}
+
+function formatWeekDate(dStr) {
+  if (!dStr) return "";
+  var parts = dStr.split('-');
+  var months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return parts[2] + " " + months[parseInt(parts[1], 10)-1];
+}
+
+function updateWeekLabels() {
+  ['dbPrevInicio','dbPrevFin','dbCurrInicio','dbCurrFin'].forEach(function(id) {
+    var val = document.getElementById(id).value;
+    if (val) {
+      var d1 = weekToDate(val, 1);
+      var d7 = weekToDate(val, 7);
+      var lbl = document.getElementById(id.replace('db', 'lbl'));
+      if (lbl) lbl.textContent = formatWeekDate(d1) + " al " + formatWeekDate(d7);
+    }
+  });
 }
 
 async function queryDB() {
