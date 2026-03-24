@@ -883,9 +883,11 @@ async function queryDB() {
     }
     var data = await resp.json();
     st.className = 'db-status ok';
-    st.textContent = 'Datos recibidos: ' + data.rows_prev + ' filas a\u00F1o anterior, ' + data.rows_curr + ' filas a\u00F1o actual';
+    var rp = data.prev ? data.prev.length : 0;
+    var rc = data.curr ? data.curr.length : 0;
+    st.textContent = 'Datos recibidos: ' + rp + ' filas a\u00F1o anterior, ' + rc + ' filas a\u00F1o actual';
 
-    if (!data.rows_prev && !data.rows_curr) {
+    if (rp === 0 && rc === 0) {
       st.className = 'db-status error';
       st.textContent = 'No se encontraron datos para ' + marca + ' en las fechas indicadas.';
       btn.textContent = 'Consultar Base de Datos';
