@@ -85,7 +85,7 @@ FROM (
         T.ciudad,
         ST.ean,
         EC.sku,
-        CF.sku_madre,
+        EC.sku_madre,
         EC.descripcion_nueva AS "descripcion",
         EC.ref_modelo AS "modelo",
         VMT.vmt_marca AS "marca",
@@ -104,7 +104,6 @@ FROM (
         0 AS "v_pvp"
     FROM dbo.dwh_stock AS ST
     LEFT JOIN dbo.cat_sku AS EC ON ST.ean = EC.ean
-    LEFT JOIN dbo.ecat_fala AS CF ON ST.ean = CF.upc
     LEFT JOIN dbo.cod_color AS CO ON EC.cod_color = CO.codigo
     LEFT JOIN dbo.tiendas AS T ON ST.num_local = T.codigo AND T.ini_cliente = ST.ini_cliente
     LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
@@ -126,7 +125,7 @@ FROM (
         T.ciudad,
         VT.ean,
         EC.sku,
-        CF.sku_madre,
+        EC.sku_madre,
         EC.descripcion_nueva AS "descripcion",
         EC.ref_modelo AS "modelo",
         VMT.vmt_marca AS "marca",
@@ -145,7 +144,6 @@ FROM (
         VT.pvp_unit AS "v_pvp"
     FROM dbo.dwh_ventas AS VT
     LEFT JOIN dbo.cat_sku AS EC ON VT.ean = EC.ean
-    LEFT JOIN dbo.ecat_fala AS CF ON VT.ean = CF.upc
     LEFT JOIN dbo.cod_color AS CO ON EC.cod_color = CO.codigo
     LEFT JOIN dbo.tiendas AS T ON VT.num_local = T.codigo AND T.ini_cliente = VT.ini_cliente
     LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
