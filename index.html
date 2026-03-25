@@ -628,6 +628,13 @@ function loadMarcas() {
       });
       marcasLoaded = true;
       setDefaultDates();
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === 'BEARCLIFF') {
+          sel.selectedIndex = i;
+          loadTiposPrograma();
+          break;
+        }
+      }
     })
     .catch(function(e) {
       sel.innerHTML = '<option value="">Error cargando marcas</option>';
