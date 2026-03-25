@@ -84,7 +84,7 @@ FROM (
         ST.num_local AS "c_l",
         T.local,
         T.ciudad,
-        T.Tipo
+        T.tipo,
         ST.ean,
         EC.sku,
         EC.sku_madre,
@@ -125,7 +125,7 @@ FROM (
         VT.num_local AS "c_l",
         T.local,
         T.ciudad,
-        T.Tipo,
+        T.tipo,
         VT.ean,
         EC.sku,
         EC.sku_madre,
