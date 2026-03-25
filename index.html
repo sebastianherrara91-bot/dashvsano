@@ -338,6 +338,7 @@ function processData(rowsPrev, rowsCurr, brandName) {
   function aggregate(rows) {
     var map = {};
     rows.forEach(function(r) {
+      if ((r.Tipo_Tienda || '').toUpperCase() !== 'TIENDA') return;
       var store = r.local || '';
       var wn = extractWeekNum(r.semanas || '');
       if (!(wn in numToIdx)) return;
