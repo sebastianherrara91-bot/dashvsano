@@ -335,16 +335,10 @@ function processData(rowsPrev, rowsCurr, brandName) {
   var numToIdx = {}; commonNums.forEach(function(n,i){numToIdx[n]=i;});
   var nw = commonNums.length;
 
-  if (weeksPrev.length) yearLabels.prev = '20' + weeksPrev[0].raw.split('/')[0].trim();
-  if (weeksCurr.length) yearLabels.curr = '20' + weeksCurr[weeksCurr.length-1].raw.split('/')[0].trim();
-
-  var excludeStores = ['CD FACO','FAL.COM','FOTO DVD','CACIQUE','FCOMALT'];
-
   function aggregate(rows) {
     var map = {};
     rows.forEach(function(r) {
       var store = r.local || '';
-      if (excludeStores.indexOf(store) >= 0) return;
       var wn = extractWeekNum(r.semanas || '');
       if (!(wn in numToIdx)) return;
       var idx = numToIdx[wn];

@@ -59,6 +59,7 @@ SELECT
     syv.c_l,
     syv.local,
     syv.ciudad,
+    syv.tipo as "Tipo_Tienda",
     syv.ean,
     syv.sku,
     syv.sku_madre,
@@ -83,6 +84,7 @@ FROM (
         ST.num_local AS "c_l",
         T.local,
         T.ciudad,
+        T.Tipo
         ST.ean,
         EC.sku,
         EC.sku_madre,
@@ -123,6 +125,7 @@ FROM (
         VT.num_local AS "c_l",
         T.local,
         T.ciudad,
+        T.Tipo,
         VT.ean,
         EC.sku,
         EC.sku_madre,
@@ -156,7 +159,8 @@ FROM (
     WHERE VT.ini_cliente = %(ini_cliente)s
       AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s
 ) AS syv
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+WHERE syv.tipo = 'TIENDA'
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 """
 
 # ── Endpoint: marcas disponibles ──────────────────────────────────────────────
