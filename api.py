@@ -159,7 +159,6 @@ FROM (
     WHERE VT.ini_cliente = %(ini_cliente)s
       AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s
 ) AS syv
-WHERE syv.tipo = 'TIENDA'
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 """
 
@@ -277,6 +276,7 @@ def consultar(
 
         with get_conn() as conn:
             with conn.cursor() as cur:
+                cur.execute("SET LOCAL work_mem = '256MB';")
                 cur.execute(final_sql, params)
                 json_str = cur.fetchone()[0]
 
