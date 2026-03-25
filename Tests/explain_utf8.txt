@@ -1,0 +1,470 @@
+﻿GroupAggregate  (cost=86206.10..86266.95 rows=200 width=660) (actual time=10540.746..11983.019 rows=402366.00 loops=1)
+  Group Key: syv.ini_cliente, syv.c_l, syv.local, syv.ciudad, syv.tipo, syv.ean, syv.sku, syv.sku_madre, syv.descripcion, syv.modelo, syv.marca, syv.subclase, syv.tipo_programa, syv.fit_estilo, syv.color, syv.cod_color, syv.color_hexa, syv.talla, syv.fecha, (((((to_char((syv.fecha)::timestamp with time zone, 'YY'::text) || '/'::text) || to_char(syv.n_sem, 'FM00'::text)) || ' - '::text) || to_char((syv.fecha)::timestamp with time zone, 'MM/DD'::text)))
+  Buffers: shared hit=21377, temp read=15397 written=15398
+  CTE valid_marca_tipo
+    ->  Finalize GroupAggregate  (cost=36125.00..36250.51 rows=116 width=49) (actual time=20.850..21.332 rows=1.00 loops=1)
+          Group Key: m_2.tipo, m_2.fit
+          Filter: (sum(st_5.cant) >= 800)
+          Rows Removed by Filter: 5
+          Buffers: shared hit=617
+          InitPlan 2
+            ->  Result  (cost=10.64..10.65 rows=1 width=4) (actual time=0.049..0.053 rows=1.00 loops=1)
+                  Buffers: shared hit=4
+                  InitPlan 1
+                    ->  Limit  (cost=10.59..10.64 rows=1 width=4) (actual time=0.047..0.051 rows=1.00 loops=1)
+                          Buffers: shared hit=4
+                          ->  Append  (cost=10.59..611126.04 rows=12395018 width=4) (actual time=0.045..0.048 rows=1.00 loops=1)
+                                Buffers: shared hit=4
+                                ->  Index Only Scan Backward using dwh_stock_2026_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2026_q1 dwh_stock_25  (cost=0.42..12013.50 rows=271054 width=4) (actual time=0.045..0.045 rows=1.00 loops=1)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 1
+                                      Buffers: shared hit=4
+                                ->  Index Only Scan Backward using dwh_stock_2025_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q3 dwh_stock_24  (cost=0.42..20272.28 rows=457593 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2025_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q2 dwh_stock_23  (cost=0.42..18586.56 rows=419507 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2025_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q1 dwh_stock_22  (cost=0.42..13774.42 rows=310900 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2024_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q3 dwh_stock_21  (cost=0.42..22737.15 rows=513236 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2024_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q2 dwh_stock_20  (cost=0.42..21168.69 rows=477813 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2024_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q1 dwh_stock_19  (cost=0.42..18584.88 rows=419423 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2023_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q3 dwh_stock_18  (cost=0.42..22471.34 rows=507146 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2023_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q2 dwh_stock_17  (cost=0.42..19408.18 rows=437988 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2023_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q1 dwh_stock_16  (cost=0.42..20428.54 rows=461006 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2022_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q3 dwh_stock_15  (cost=0.42..24462.95 rows=552126 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2022_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q2 dwh_stock_14  (cost=0.42..26265.37 rows=592847 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2022_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q1 dwh_stock_13  (cost=0.42..28690.23 rows=647690 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2021_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q3 dwh_stock_12  (cost=0.42..31579.69 rows=712963 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2021_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q2 dwh_stock_11  (cost=0.42..25056.73 rows=565615 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2021_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q1 dwh_stock_10  (cost=0.42..20942.50 rows=472704 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2020_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q3 dwh_stock_9  (cost=0.42..23888.37 rows=539197 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2020_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q2 dwh_stock_8  (cost=0.42..26816.24 rows=605391 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2020_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q1 dwh_stock_7  (cost=0.42..26748.28 rows=603793 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2019_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q3 dwh_stock_6  (cost=0.42..33224.71 rows=750014 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2019_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q2 dwh_stock_5  (cost=0.42..20272.66 rows=457612 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2019_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q1 dwh_stock_4  (cost=0.42..19905.44 rows=449251 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2018_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q3 dwh_stock_3  (cost=0.42..27281.59 rows=615858 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2018_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q2 dwh_stock_2  (cost=0.42..16578.38 rows=374098 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+                                ->  Index Only Scan Backward using dwh_stock_2018_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q1 dwh_stock_1  (cost=0.42..7992.28 rows=180193 width=4) (never executed)
+                                      Index Cond: ((ini_cliente = 'FL'::text) AND (fecha <= '2026-03-24'::date))
+                                      Heap Fetches: 0
+                                      Index Searches: 0
+          ->  Gather Merge  (cost=36114.35..36229.25 rows=835 width=48) (actual time=20.591..21.315 rows=8.00 loops=1)
+                Workers Planned: 2
+                Workers Launched: 2
+                Buffers: shared hit=617
+                ->  Partial GroupAggregate  (cost=35114.32..35132.84 rows=348 width=48) (actual time=14.109..14.389 rows=2.67 loops=3)
+                      Group Key: m_2.tipo, m_2.fit
+                      Buffers: shared hit=613
+                      ->  Sort  (cost=35114.32..35118.08 rows=1504 width=44) (actual time=14.104..14.176 rows=1469.00 loops=3)
+                            Sort Key: m_2.tipo, m_2.fit
+                            Sort Method: quicksort  Memory: 109kB
+                            Buffers: shared hit=613
+                            Worker 0:  Sort Method: quicksort  Memory: 114kB
+                            Worker 1:  Sort Method: quicksort  Memory: 129kB
+                            ->  Hash Left Join  (cost=1778.07..35034.95 rows=1504 width=44) (actual time=8.703..13.536 rows=1469.00 loops=3)
+                                  Hash Cond: ((ec_2.ref_modelo = m_2.modelo) AND (ec_2.marca = m_2.marca))
+                                  Buffers: shared hit=597
+                                  ->  Hash Left Join  (cost=1628.17..34868.75 rows=1504 width=38) (actual time=7.119..11.560 rows=1469.00 loops=3)
+                                        Hash Cond: (SUBSTRING(ec_2.categoria FROM 1 FOR 7) = (ms_2.subcategoria)::text)
+                                        Filter: ((COALESCE(ms_2.marca, (ma_2.new_marca)::character varying, (ec_2.marca)::character varying))::text = 'BEARCLIFF'::text)
+                                        Rows Removed by Filter: 4750
+                                        Buffers: shared hit=408
+                                        ->  Parallel Hash Left Join  (cost=1627.07..34018.39 rows=300755 width=42) (actual time=7.087..10.079 rows=6219.33 loops=3)
+                                              Hash Cond: (st_5.ean = ec_2.ean)
+                                              Buffers: shared hit=405
+                                              ->  Parallel Append  (cost=0.42..30010.79 rows=300757 width=21) (actual time=0.055..1.418 rows=6219.33 loops=3)
+                                                    Buffers: shared hit=119
+                                                    ->  Parallel Index Only Scan using dwh_stock_2021_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q3 st_17  (cost=0.42..1614.56 rows=17475 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2019_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q3 st_11  (cost=0.42..1606.71 rows=17361 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2022_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q1 st_18  (cost=0.42..1468.16 rows=15875 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2018_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q3 st_8  (cost=0.42..1397.64 rows=15095 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2020_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q2 st_13  (cost=0.42..1372.91 rows=14838 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2020_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q1 st_12  (cost=0.42..1367.58 rows=14799 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2022_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q2 st_19  (cost=0.42..1271.02 rows=13723 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2021_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q2 st_16  (cost=0.42..1263.50 rows=18484 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2022_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2022_q3 st_20  (cost=0.42..1252.53 rows=13532 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2020_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2020_q3 st_14  (cost=0.42..1221.75 rows=13215 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2024_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q2 st_25  (cost=0.42..1130.83 rows=16534 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2024_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q3 st_26  (cost=0.42..1089.44 rows=15889 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2023_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q3 st_23  (cost=0.42..1135.91 rows=16574 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2021_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2021_q1 st_15  (cost=0.42..1118.05 rows=16356 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2019_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q2 st_10  (cost=0.42..1083.94 rows=15834 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2025_q3_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q3 st_29  (cost=0.42..1083.93 rows=15834 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2019_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2019_q1 st_9  (cost=0.42..1064.15 rows=15545 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2023_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q2 st_22  (cost=0.42..1037.62 rows=15155 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2023_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2023_q1 st_21  (cost=0.42..1031.19 rows=15065 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2024_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2024_q1 st_24  (cost=0.42..992.27 rows=14513 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2025_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q2 st_28  (cost=0.42..938.58 rows=13709 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2026_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2026_q1 st_30  (cost=0.42..911.17 rows=13287 width=21) (actual time=0.046..0.979 rows=6219.33 loops=3)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 1
+                                                          Buffers: shared hit=119
+                                                    ->  Parallel Index Only Scan using dwh_stock_2018_q2_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q2 st_7  (cost=0.42..885.93 rows=12945 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2025_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2025_q1 st_27  (cost=0.42..738.88 rows=10758 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Index Only Scan using dwh_stock_2018_q1_ini_cliente_fecha_ean_cant_idx on dwh_stock_2018_q1 st_6  (cost=0.42..428.77 rows=6235 width=21) (never executed)
+                                                          Index Cond: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                          Heap Fetches: 0
+                                                          Index Searches: 0
+                                                    ->  Parallel Seq Scan on dwh_stock_2026_q2 st_31  (cost=0.00..0.00 rows=1 width=68) (never executed)
+                                                          Filter: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                                    ->  Parallel Seq Scan on dwh_stock_2026_q3 st_32  (cost=0.00..0.00 rows=1 width=68) (never executed)
+                                                          Filter: ((ini_cliente = 'FL'::text) AND (fecha = (InitPlan 2).col1))
+                                              ->  Parallel Hash  (cost=1466.61..1466.61 rows=12803 width=48) (actual time=6.983..6.985 rows=10242.67 loops=3)
+                                                    Buckets: 32768  Batches: 1  Memory Usage: 2688kB
+                                                    Buffers: shared hit=286
+                                                    ->  Hash Left Join  (cost=1.50..1466.61 rows=12803 width=48) (actual time=0.049..2.927 rows=10242.67 loops=3)
+                                                          Hash Cond: (ec_2.marca = ma_2.marca_bd)
+                                                          Buffers: shared hit=286
+                                                          ->  Parallel Index Only Scan using idx_cat_sku_lookup on cat_sku ec_2  (cost=0.41..1410.09 rows=12803 width=41) (actual time=0.022..1.447 rows=10242.67 loops=3)
+                                                                Heap Fetches: 0
+                                                                Index Searches: 1
+                                                                Buffers: shared hit=283
+                                                          ->  Hash  (cost=1.04..1.04 rows=4 width=14) (actual time=0.015..0.016 rows=4.00 loops=3)
+                                                                Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                                Buffers: shared hit=3
+                                                                ->  Seq Scan on marca ma_2  (cost=0.00..1.04 rows=4 width=14) (actual time=0.009..0.010 rows=4.00 loops=3)
+                                                                      Buffers: shared hit=3
+                                        ->  Hash  (cost=1.05..1.05 rows=4 width=19) (actual time=0.013..0.013 rows=4.00 loops=3)
+                                              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                              Buffers: shared hit=3
+                                              ->  Seq Scan on marca_subclase ms_2  (cost=0.00..1.05 rows=4 width=19) (actual time=0.009..0.010 rows=4.00 loops=3)
+                                                    Filter: ((ini_cliente)::text = 'FL'::text)
+                                                    Buffers: shared hit=3
+                                  ->  Hash  (cost=97.76..97.76 rows=3476 width=35) (actual time=1.562..1.562 rows=3476.00 loops=3)
+                                        Buckets: 4096  Batches: 1  Memory Usage: 268kB
+                                        Buffers: shared hit=189
+                                        ->  Seq Scan on monitoreo m_2  (cost=0.00..97.76 rows=3476 width=35) (actual time=0.007..0.392 rows=3476.00 loops=3)
+                                              Buffers: shared hit=189
+  ->  Sort  (cost=49955.59..49957.56 rows=790 width=652) (actual time=10540.720..11193.145 rows=588641.00 loops=1)
+        Sort Key: syv.ini_cliente, syv.c_l, syv.local, syv.ciudad, syv.tipo, syv.ean, syv.sku, syv.sku_madre, syv.descripcion, syv.modelo, syv.marca, syv.subclase, syv.tipo_programa, syv.fit_estilo, syv.color, syv.cod_color, syv.color_hexa, syv.talla, syv.fecha, (((((to_char((syv.fecha)::timestamp with time zone, 'YY'::text) || '/'::text) || to_char(syv.n_sem, 'FM00'::text)) || ' - '::text) || to_char((syv.fecha)::timestamp with time zone, 'MM/DD'::text)))
+        Sort Method: external merge  Disk: 123176kB
+        Buffers: shared hit=21016, temp read=15397 written=15398
+        ->  Subquery Scan on syv  (cost=3288.53..49917.57 rows=790 width=652) (actual time=40.195..1943.739 rows=588641.00 loops=1)
+              Buffers: shared hit=21013
+              ->  Append  (cost=3288.53..49891.89 rows=790 width=628) (actual time=40.138..1361.371 rows=588641.00 loops=1)
+                    Buffers: shared hit=21013
+                    ->  Subquery Scan on "*SELECT* 1"  (cost=3288.53..34554.31 rows=582 width=271) (actual time=40.137..907.857 rows=392277.00 loops=1)
+                          Buffers: shared hit=14626
+                          ->  Hash Left Join  (cost=3288.53..34547.04 rows=582 width=243) (actual time=40.135..825.924 rows=392277.00 loops=1)
+                                Hash Cond: ((date_trunc('week'::text, (st.fecha)::timestamp with time zone))::date = sem.dia_inicio)
+                                Buffers: shared hit=14626
+                                ->  Nested Loop Left Join  (cost=3255.28..34497.78 rows=582 width=204) (actual time=39.849..328.551 rows=392277.00 loops=1)
+                                      Join Filter: (NOT (vmt.vmt_fit IS DISTINCT FROM m.fit))
+                                      Rows Removed by Join Filter: 1836
+                                      Buffers: shared hit=14617
+                                      ->  Gather  (cost=3255.28..34481.79 rows=582 width=195) (actual time=18.985..56.507 rows=392277.00 loops=1)
+                                            Workers Planned: 2
+                                            Workers Launched: 2
+                                            Buffers: shared hit=14361
+                                            ->  Hash Left Join  (cost=2255.28..33423.59 rows=242 width=195) (actual time=17.260..463.631 rows=130759.00 loops=3)
+                                                  Hash Cond: (st.num_local = t.codigo)
+                                                  Buffers: shared hit=14361
+                                                  ->  Hash Left Join  (cost=2232.13..33399.44 rows=242 width=154) (actual time=17.162..431.351 rows=130759.00 loops=3)
+                                                        Hash Cond: (ec.cod_color = co.codigo)
+                                                        Buffers: shared hit=14328
+                                                        ->  Hash Left Join  (cost=2226.46..33392.44 rows=242 width=137) (actual time=17.076..398.447 rows=130759.00 loops=3)
+                                                              Hash Cond: (SUBSTRING(ec.categoria FROM 1 FOR 7) = (ms.subcategoria)::text)
+                                                              Filter: ((COALESCE(ms.marca, (ma.new_marca)::character varying, (ec.marca)::character varying))::text = 'BEARCLIFF'::text)
+                                                              Rows Removed by Filter: 353314
+                                                              Buffers: shared hit=14322
+                                                              ->  Parallel Hash Join  (cost=2225.36..33254.47 rows=48474 width=129) (actual time=17.026..276.499 rows=484072.67 loops=3)
+                                                                    Hash Cond: (st.ean = ec.ean)
+                                                                    Buffers: shared hit=14319
+                                                                    ->  Parallel Append  (cost=0.00..28464.23 rows=607940 width=29) (actual time=3.280..103.167 rows=486430.00 loops=3)
+                                                                          Buffers: shared hit=12459
+                                                                          ->  Parallel Seq Scan on dwh_stock_2025_q2 st_2  (cost=0.00..7169.87 rows=174795 width=29) (actual time=0.012..60.536 rows=419635.00 loops=1)
+                                                                                Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                                Rows Removed by Filter: 65559
+                                                                                Buffers: shared hit=3632
+                                                                          ->  Parallel Seq Scan on dwh_stock_2025_q1 st_1  (cost=0.00..6768.78 rows=129542 width=31) (actual time=9.816..50.900 rows=311008.00 loops=1)
+                                                                                Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                                Rows Removed by Filter: 141671
+                                                                                Buffers: shared hit=3468
+                                                                          ->  Parallel Seq Scan on dwh_stock_2025_q3 st_3  (cost=0.00..6701.62 rows=190664 width=28) (actual time=0.012..60.217 rows=457593.00 loops=1)
+                                                                                Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                                Buffers: shared hit=3365
+                                                                          ->  Parallel Seq Scan on dwh_stock_2026_q1 st_4  (cost=0.00..4784.26 rows=159444 width=28) (actual time=0.007..11.958 rows=90351.33 loops=3)
+                                                                                Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                                Buffers: shared hit=1994
+                                                                    ->  Parallel Hash  (cost=2207.35..2207.35 rows=1441 width=113) (actual time=13.649..13.652 rows=6643.33 loops=3)
+                                                                          Buckets: 32768 (originally 4096)  Batches: 1 (originally 1)  Memory Usage: 3552kB
+                                                                          Buffers: shared hit=1860
+                                                                          ->  Hash Left Join  (cost=157.19..2207.35 rows=1441 width=113) (actual time=2.297..7.353 rows=6643.33 loops=3)
+                                                                                Hash Cond: (ec.marca = ma.marca_bd)
+                                                                                Buffers: shared hit=1860
+                                                                                ->  Hash Join  (cost=156.10..2200.01 rows=1441 width=106) (actual time=2.263..6.302 rows=6643.33 loops=3)
+                                                                                      Hash Cond: ((ec.ref_modelo = m.modelo) AND (ec.marca = m.marca))
+                                                                                      Buffers: shared hit=1857
+                                                                                      ->  Parallel Seq Scan on cat_sku ec  (cost=0.00..1848.75 rows=18075 width=89) (actual time=0.013..1.066 rows=10242.67 loops=3)
+                                                                                            Buffers: shared hit=1668
+                                                                                      ->  Hash  (cost=106.45..106.45 rows=3310 width=35) (actual time=1.705..1.706 rows=3310.00 loops=3)
+                                                                                            Buckets: 4096  Batches: 1  Memory Usage: 257kB
+                                                                                            Buffers: shared hit=189
+                                                                                            ->  Seq Scan on monitoreo m  (cost=0.00..106.45 rows=3310 width=35) (actual time=0.018..0.568 rows=3310.00 loops=3)
+                                                                                                  Filter: (tipo = 'PROGRAMA'::text)
+                                                                                                  Rows Removed by Filter: 166
+                                                                                                  Buffers: shared hit=189
+                                                                                ->  Hash  (cost=1.04..1.04 rows=4 width=14) (actual time=0.018..0.019 rows=4.00 loops=3)
+                                                                                      Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                                                      Buffers: shared hit=3
+                                                                                      ->  Seq Scan on marca ma  (cost=0.00..1.04 rows=4 width=14) (actual time=0.012..0.013 rows=4.00 loops=3)
+                                                                                            Buffers: shared hit=3
+                                                              ->  Hash  (cost=1.05..1.05 rows=4 width=19) (actual time=0.019..0.020 rows=4.00 loops=3)
+                                                                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                                    Buffers: shared hit=3
+                                                                    ->  Seq Scan on marca_subclase ms  (cost=0.00..1.05 rows=4 width=19) (actual time=0.014..0.015 rows=4.00 loops=3)
+                                                                          Filter: ((ini_cliente)::text = 'FL'::text)
+                                                                          Buffers: shared hit=3
+                                                        ->  Hash  (cost=3.63..3.63 rows=163 width=23) (actual time=0.070..0.070 rows=163.00 loops=3)
+                                                              Buckets: 1024  Batches: 1  Memory Usage: 17kB
+                                                              Buffers: shared hit=6
+                                                              ->  Seq Scan on cod_color co  (cost=0.00..3.63 rows=163 width=23) (actual time=0.009..0.026 rows=163.00 loops=3)
+                                                                    Buffers: shared hit=6
+                                                  ->  Hash  (cost=22.68..22.68 rows=38 width=57) (actual time=0.083..0.083 rows=38.00 loops=3)
+                                                        Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                                        Buffers: shared hit=33
+                                                        ->  Seq Scan on tiendas t  (cost=0.00..22.68 rows=38 width=57) (actual time=0.065..0.071 rows=38.00 loops=3)
+                                                              Filter: (ini_cliente = 'FL'::text)
+                                                              Rows Removed by Filter: 896
+                                                              Buffers: shared hit=33
+                                      ->  CTE Scan on valid_marca_tipo vmt  (cost=0.00..2.90 rows=1 width=96) (actual time=0.000..0.000 rows=1.00 loops=392277)
+                                            Filter: ((vmt_tipo = 'PROGRAMA'::text) AND ((vmt_marca)::text = 'BEARCLIFF'::text))
+                                            Storage: Memory  Maximum Storage: 17kB
+                                            Buffers: shared hit=256
+                                ->  Hash  (cost=19.78..19.78 rows=1078 width=12) (actual time=0.263..0.263 rows=1078.00 loops=1)
+                                      Buckets: 2048  Batches: 1  Memory Usage: 63kB
+                                      Buffers: shared hit=9
+                                      ->  Seq Scan on semanas sem  (cost=0.00..19.78 rows=1078 width=12) (actual time=0.011..0.108 rows=1078.00 loops=1)
+                                            Buffers: shared hit=9
+                    ->  Hash Left Join  (cost=3288.53..15333.63 rows=208 width=246) (actual time=18.759..409.931 rows=196364.00 loops=1)
+                          Hash Cond: ((date_trunc('week'::text, (vt.fecha)::timestamp with time zone))::date = sem_1.dia_inicio)
+                          Buffers: shared hit=6387
+                          ->  Nested Loop Left Join  (cost=3255.28..15294.65 rows=208 width=211) (actual time=18.484..163.429 rows=196364.00 loops=1)
+                                Join Filter: (NOT (vmt_1.vmt_fit IS DISTINCT FROM m_1.fit))
+                                Rows Removed by Join Filter: 174
+                                Buffers: shared hit=6378
+                                ->  Gather  (cost=3255.28..15287.08 rows=208 width=202) (actual time=18.479..36.543 rows=196364.00 loops=1)
+                                      Workers Planned: 2
+                                      Workers Launched: 2
+                                      Buffers: shared hit=6378
+                                      ->  Hash Left Join  (cost=2255.28..14266.28 rows=87 width=202) (actual time=13.663..188.682 rows=65454.67 loops=3)
+                                            Hash Cond: (vt.num_local = t_1.codigo)
+                                            Buffers: shared hit=6378
+                                            ->  Hash Left Join  (cost=2232.13..14242.76 rows=87 width=161) (actual time=13.572..172.265 rows=65454.67 loops=3)
+                                                  Hash Cond: (ec_1.cod_color = co_1.codigo)
+                                                  Buffers: shared hit=6345
+                                                  ->  Hash Left Join  (cost=2226.46..14236.62 rows=87 width=143) (actual time=13.489..156.019 rows=65454.67 loops=3)
+                                                        Hash Cond: (SUBSTRING(ec_1.categoria FROM 1 FOR 7) = (ms_1.subcategoria)::text)
+                                                        Filter: ((COALESCE(ms_1.marca, (ma_1.new_marca)::character varying, (ec_1.marca)::character varying))::text = 'BEARCLIFF'::text)
+                                                        Rows Removed by Filter: 108158
+                                                        Buffers: shared hit=6339
+                                                        ->  Parallel Hash Join  (cost=2225.36..14186.57 rows=17335 width=135) (actual time=13.452..110.041 rows=173613.00 loops=3)
+                                                              Hash Cond: (vt.ean = ec_1.ean)
+                                                              Buffers: shared hit=6336
+                                                              ->  Parallel Append  (cost=0.00..11043.94 rows=217415 width=35) (actual time=0.105..37.388 rows=173942.33 loops=3)
+                                                                    Buffers: shared hit=4476
+                                                                    ->  Parallel Seq Scan on dwh_ventas_2025_q3 vt_3  (cost=0.00..4430.16 rows=139373 width=35) (actual time=0.014..17.461 rows=118473.50 loops=2)
+                                                                          Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                          Buffers: shared hit=1991
+                                                                    ->  Parallel Seq Scan on dwh_ventas_2025_q2 vt_2  (cost=0.00..2524.17 rows=77353 width=35) (actual time=0.291..18.375 rows=131512.00 loops=1)
+                                                                          Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                          Rows Removed by Filter: 3533
+                                                                          Buffers: shared hit=1134
+                                                                    ->  Parallel Seq Scan on dwh_ventas_2025_q1 vt_1  (cost=0.00..1801.57 rows=52386 width=36) (actual time=0.559..12.742 rows=89063.00 loops=1)
+                                                                          Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                          Rows Removed by Filter: 7067
+                                                                          Buffers: shared hit=812
+                                                                    ->  Parallel Seq Scan on dwh_ventas_2026_q1 vt_4  (cost=0.00..1200.96 rows=37826 width=35) (actual time=0.007..4.307 rows=32152.50 loops=2)
+                                                                          Filter: ((fecha >= '2025-01-01'::date) AND (fecha <= '2026-03-24'::date) AND (ini_cliente = 'FL'::text))
+                                                                          Buffers: shared hit=539
+                                                              ->  Parallel Hash  (cost=2207.35..2207.35 rows=1441 width=113) (actual time=13.249..13.253 rows=6643.33 loops=3)
+                                                                    Buckets: 32768 (originally 4096)  Batches: 1 (originally 1)  Memory Usage: 3552kB
+                                                                    Buffers: shared hit=1860
+                                                                    ->  Hash Left Join  (cost=157.19..2207.35 rows=1441 width=113) (actual time=2.169..7.082 rows=6643.33 loops=3)
+                                                                          Hash Cond: (ec_1.marca = ma_1.marca_bd)
+                                                                          Buffers: shared hit=1860
+                                                                          ->  Hash Join  (cost=156.10..2200.01 rows=1441 width=106) (actual time=2.142..6.043 rows=6643.33 loops=3)
+                                                                                Hash Cond: ((ec_1.ref_modelo = m_1.modelo) AND (ec_1.marca = m_1.marca))
+                                                                                Buffers: shared hit=1857
+                                                                                ->  Parallel Seq Scan on cat_sku ec_1  (cost=0.00..1848.75 rows=18075 width=89) (actual time=0.008..0.897 rows=10242.67 loops=3)
+                                                                                      Buffers: shared hit=1668
+                                                                                ->  Hash  (cost=106.45..106.45 rows=3310 width=35) (actual time=1.673..1.674 rows=3310.00 loops=3)
+                                                                                      Buckets: 4096  Batches: 1  Memory Usage: 257kB
+                                                                                      Buffers: shared hit=189
+                                                                                      ->  Seq Scan on monitoreo m_1  (cost=0.00..106.45 rows=3310 width=35) (actual time=0.015..0.548 rows=3310.00 loops=3)
+                                                                                            Filter: (tipo = 'PROGRAMA'::text)
+                                                                                            Rows Removed by Filter: 166
+                                                                                            Buffers: shared hit=189
+                                                                          ->  Hash  (cost=1.04..1.04 rows=4 width=14) (actual time=0.014..0.014 rows=4.00 loops=3)
+                                                                                Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                                                Buffers: shared hit=3
+                                                                                ->  Seq Scan on marca ma_1  (cost=0.00..1.04 rows=4 width=14) (actual time=0.009..0.010 rows=4.00 loops=3)
+                                                                                      Buffers: shared hit=3
+                                                        ->  Hash  (cost=1.05..1.05 rows=4 width=19) (actual time=0.017..0.017 rows=4.00 loops=3)
+                                                              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                              Buffers: shared hit=3
+                                                              ->  Seq Scan on marca_subclase ms_1  (cost=0.00..1.05 rows=4 width=19) (actual time=0.012..0.013 rows=4.00 loops=3)
+                                                                    Filter: ((ini_cliente)::text = 'FL'::text)
+                                                                    Buffers: shared hit=3
+                                                  ->  Hash  (cost=3.63..3.63 rows=163 width=23) (actual time=0.067..0.067 rows=163.00 loops=3)
+                                                        Buckets: 1024  Batches: 1  Memory Usage: 17kB
+                                                        Buffers: shared hit=6
+                                                        ->  Seq Scan on cod_color co_1  (cost=0.00..3.63 rows=163 width=23) (actual time=0.007..0.025 rows=163.00 loops=3)
+                                                              Buffers: shared hit=6
+                                            ->  Hash  (cost=22.68..22.68 rows=38 width=57) (actual time=0.079..0.079 rows=38.00 loops=3)
+                                                  Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                                  Buffers: shared hit=33
+                                                  ->  Seq Scan on tiendas t_1  (cost=0.00..22.68 rows=38 width=57) (actual time=0.061..0.066 rows=38.00 loops=3)
+                                                        Filter: (ini_cliente = 'FL'::text)
+                                                        Rows Removed by Filter: 896
+                                                        Buffers: shared hit=33
+                                ->  CTE Scan on valid_marca_tipo vmt_1  (cost=0.00..2.90 rows=1 width=96) (actual time=0.000..0.000 rows=1.00 loops=196364)
+                                      Filter: ((vmt_tipo = 'PROGRAMA'::text) AND ((vmt_marca)::text = 'BEARCLIFF'::text))
+                                      Storage: Memory  Maximum Storage: 17kB
+                          ->  Hash  (cost=19.78..19.78 rows=1078 width=12) (actual time=0.255..0.256 rows=1078.00 loops=1)
+                                Buckets: 2048  Batches: 1  Memory Usage: 63kB
+                                Buffers: shared hit=9
+                                ->  Seq Scan on semanas sem_1  (cost=0.00..19.78 rows=1078 width=12) (actual time=0.005..0.105 rows=1078.00 loops=1)
+                                      Buffers: shared hit=9
+Planning:
+  Buffers: shared hit=3089
+Planning Time: 13.081 ms
+Execution Time: 12014.684 ms
