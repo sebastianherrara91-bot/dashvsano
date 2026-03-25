@@ -246,7 +246,6 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
       <button class="week-btn" onclick="selectAll()">Todas</button>
       <button class="week-btn" onclick="selectNone()">Ninguna</button>
     </div>
-    <div class="filter-hint">Ventas = suma de semanas seleccionadas &middot; Stock = snapshot de la &uacute;ltima semana seleccionada</div>
   </div>
 
   <div id="kpis" class="kpi-row"></div>
@@ -313,6 +312,8 @@ function extractWeekNum(s) {
 }
 
 function processData(rowsPrev, rowsCurr, brandName) {
+  if (rowsPrev && rowsPrev.length > 0 && rowsPrev[0].fecha) yearLabels.prev = rowsPrev[0].fecha.substring(0, 4);
+  if (rowsCurr && rowsCurr.length > 0 && rowsCurr[0].fecha) yearLabels.curr = rowsCurr[0].fecha.substring(0, 4);
 
   function getWeeks(rows) {
     var map = {};
@@ -575,13 +576,13 @@ var miniOpts={interaction:{mode:'index',intersect:false},plugins:{legend:{displa
 function buildStoreCards() {
   var grid='', u=viewMode==='money';
   var vLbl=u?'Ventas (miles $)':'Ventas', sLbl=u?'Inventario (miles $)':'Inventario';
-  var vtLbl=u?'Ventas (miles $)':'Ventas (suma)';
+  var vtLbl=u?'Ventas (miles $)':'VENTAS';
 
   D.store_order.forEach(function(s,i){
     var d=D.stores[s], m=getStoreMetrics(s);
     var lw=D.week_labels[selectedWeeks[selectedWeeks.length-1]];
     var lp=yearLabels.prev, lc=yearLabels.curr;
-    var stLbl=u?'Stk miles $ ('+lw+')':'Stock ('+lw+')';
+    var stLbl=u?'Inventario (miles $)':'INVENTARIO';
     grid+='<div class="store-card" id="card_'+i+'">'+
       '<div class="store-header"><div><div class="store-name">'+s+'</div><div class="store-city">'+d.ciudad+'</div></div>'+
       '<div class="badges"><span class="badge '+cl(m.vpct)+'">Vta '+pctS(m.vpct)+'</span><span class="badge '+cl(m.spct)+'">Stk '+pctS(m.spct)+'</span></div></div>'+
