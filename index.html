@@ -63,7 +63,7 @@ header p{color:var(--text2);font-size:14px}
 .kpi .sub{font-size:12px;color:var(--text2);margin-top:4px}
 .up{color:var(--green)}.down{color:var(--red)}.neutral{color:var(--yellow)}
 .section-title{font-size:20px;font-weight:700;margin:32px 0 16px;padding-left:12px;border-left:3px solid var(--accent)}
-.global-charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px}
+.global-charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:32px}
 @media(max-width:768px){.global-charts{grid-template-columns:1fr}}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
 .chart-card h3{font-size:14px;color:var(--text2);margin-bottom:12px;font-weight:500}
@@ -270,6 +270,7 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
   <div class="section-title">Desempe&ntilde;o Global &mdash; Red Completa</div>
   <div class="global-charts">
     <div class="chart-card"><h3>Ventas Semanales (unidades)</h3><canvas id="globalVentas"></canvas></div>
+    <div class="chart-card"><h3>Venta Total a la Fecha (acumulado)</h3><canvas id="globalCumVentas"></canvas></div>
     <div class="chart-card"><h3>Inventario Semanal (unidades)</h3><canvas id="globalStock"></canvas></div>
   </div>
 
@@ -289,7 +290,7 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
 // ============================================================
 var D = null;
 var selectedWeeks = [];
-var globalVentasChart = null, globalStockChart = null;
+var globalVentasChart = null, globalCumVentasChart = null, globalStockChart = null;
 var storeCharts = {};
 var currentSort = {col: 'v25', dir: 'desc'};
 var yearLabels = {prev: 'Año Anterior', curr: 'Año Actual'};
@@ -506,11 +507,20 @@ function updateKPIs() {
 // --- Global charts ---
 function updateGlobalCharts() {
   if(globalVentasChart) globalVentasChart.destroy();
+  if(globalCumVentasChart) globalCumVentasChart.destroy();
   if(globalStockChart) globalStockChart.destroy();
   var fl=fL();
+  var vPrev = chartData(viewMode==='money'?D.global.vd25:D.global.v25,'25',false);
+  var vCurr = chartData(viewMode==='money'?D.global.vd26:D.global.v26,'26',false);
   globalVentasChart = makeChart(document.getElementById('globalVentas'),fl,[
-    {label:yearLabels.prev,data:chartData(D.global.vd25,'25',false).length?chartData(viewMode==='money'?D.global.vd25:D.global.v25,'25',false):fA(D.global.v25),borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
-    {label:yearLabels.curr,data:chartData(viewMode==='money'?D.global.vd26:D.global.v26,'26',false),borderColor:'#4f8cff',backgroundColor:'rgba(79,140,255,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2}
+    {label:yearLabels.prev,data:vPrev,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
+    {label:yearLabels.curr,data:vCurr,borderColor:'#4f8cff',backgroundColor:'rgba(79,140,255,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2}
+  ]);
+  // Cumulative ventas
+  function cumSum(arr) { var s=0; return arr.map(function(v){s+=v;return s;}); }
+  globalCumVentasChart = makeChart(document.getElementById('globalCumVentas'),fl,[
+    {label:yearLabels.prev,data:cumSum(vPrev),borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
+    {label:yearLabels.curr,data:cumSum(vCurr),borderColor:'#4f8cff',backgroundColor:'rgba(79,140,255,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2}
   ]);
   globalStockChart = makeChart(document.getElementById('globalStock'),fl,[
     {label:yearLabels.prev,data:chartData(D.global.st25,'25',true),borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
