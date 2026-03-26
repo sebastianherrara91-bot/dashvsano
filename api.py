@@ -1,6 +1,7 @@
 """
-INCOTEXCO Dashboard Comparativo — API Backend v1.1
+INCOTEXCO Dashboard Comparativo — API Backend v2.0
 FastAPI + PostgreSQL (DWH_INCO)
+Optimizado: SELECT 6 cols (vs 23), GROUP BY 4 (vs 20), sin JOINs a ecat_fala/cod_color, filtro TIENDA en SQL
 """
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -10,17 +11,15 @@ import psycopg2
 import psycopg2.extras
 import os, datetime
 import concurrent.futures
-
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-app = FastAPI(title="INCOTEXCO Dashboard API", version="1.1")
+app = FastAPI(title="INCOTEXCO Dashboard API", version="2.0")
 
-# Habilitar CORS (si se requiere para desarrollo externo)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Cambiar por ["https://tudominio.com"] en producción
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,7 +34,9 @@ def get_conn():
         password=os.getenv("DB_PASSWORD"),
     )
 
-# ── SQL base ──────────────────────────────────────────────────────────────────
+# ── SQL optimizado ────────────────────────────────────────────────────────────
+# v1.1: 23 columnas, GROUP BY 20, JOINs a ecat_fala + cod_color, filtro TIENDA en JS
+# v2.0: 6 columnas, GROUP BY 4, sin JOINs innecesarios, T.tipo='TIENDA' en SQL
 QUERY_DATA = """
 WITH Valid_Marca_Tipo AS (
     SELECT
@@ -55,117 +56,63 @@ WITH Valid_Marca_Tipo AS (
     HAVING SUM(ST.cant) >= %(stock_threshold)s
 )
 SELECT
-    syv.ini_cliente,
-    syv.c_l,
     syv.local,
     syv.ciudad,
-    syv.tipo as "Tipo_Tienda",
-    syv.ean,
-    syv.sku,
-    syv.sku_madre,
-    syv.descripcion,
-    syv.modelo,
-    syv.marca AS "Marca",
-    syv.subclase,
-    syv.tipo_programa AS "Tipo_Programa",
-    syv.fit_estilo,
-    syv.color,
-    syv.cod_color,
-    syv.color_hexa,
-    syv.talla,
-    syv.fecha,
     to_char(syv.fecha, 'YY') || '/' || to_char(syv.n_sem, 'FM00') || ' - ' || to_char(syv.fecha, 'MM/DD') AS "semanas",
     SUM(syv.v_cant) AS "cant_venta",
     SUM(syv.s_cant) AS "cant_stock",
     NULLIF(ROUND(SUM(syv.v_cant * syv.v_pvp) / NULLIF(SUM(syv.v_cant), 0), 0), 0) AS "pvp_prom"
 FROM (
     SELECT
-        ST.ini_cliente,
-        ST.num_local AS "c_l",
         T.local,
         T.ciudad,
-        T.tipo,
-        ST.ean,
-        EC.sku,
-        EC.sku_madre,
-        EC.descripcion_nueva AS "descripcion",
-        EC.ref_modelo AS "modelo",
-        VMT.vmt_marca AS "marca",
-        substring(EC.categoria from 1 for 7) AS subclase,
-        M.tipo AS "tipo_programa",
-        M.fit AS "fit_estilo",
-        CO.color AS "color",
-        CO.codigo AS "cod_color",
-        CO.color_hexa AS "color_hexa",
-        EC.talla AS "talla",
         (date_trunc('week', ST.fecha))::date AS fecha,
         SEM.n_sem,
-        SEM.ano,
         0 AS "v_cant",
         ST.cant AS "s_cant",
         0 AS "v_pvp"
     FROM dbo.dwh_stock AS ST
-    LEFT JOIN dbo.cat_sku AS EC ON ST.ean = EC.ean
-    LEFT JOIN dbo.cod_color AS CO ON EC.cod_color = CO.codigo
-    LEFT JOIN dbo.tiendas AS T ON ST.num_local = T.codigo AND T.ini_cliente = ST.ini_cliente
+    JOIN dbo.cat_sku AS EC ON ST.ean = EC.ean
+    JOIN dbo.tiendas AS T ON ST.num_local = T.codigo AND T.ini_cliente = ST.ini_cliente AND T.tipo = 'TIENDA' AND UPPER(T.local) != 'CACIQUE'
     LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
     LEFT JOIN dbo.marca_subclase AS MS ON ST.ini_cliente = MS.ini_cliente AND substring(EC.categoria from 1 for 7) = MS.subcategoria
     LEFT JOIN dbo.marca AS MA ON EC.marca = MA.marca_bd
-    LEFT JOIN Valid_Marca_Tipo AS VMT ON VMT.vmt_tipo = M.tipo
+    JOIN Valid_Marca_Tipo AS VMT ON VMT.vmt_tipo = M.tipo
         AND VMT.vmt_fit IS NOT DISTINCT FROM M.fit
         AND VMT.vmt_marca = COALESCE(MS.marca, MA.new_marca, EC.marca)
-    LEFT JOIN dbo.semanas AS SEM ON (date_trunc('week', ST.fecha))::date = SEM.dia_inicio
+    JOIN dbo.semanas AS SEM ON (date_trunc('week', ST.fecha))::date = SEM.dia_inicio
     WHERE ST.ini_cliente = %(ini_cliente)s
       AND ST.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s
 
     UNION ALL
 
     SELECT
-        VT.ini_cliente,
-        VT.num_local AS "c_l",
         T.local,
         T.ciudad,
-        T.tipo,
-        VT.ean,
-        EC.sku,
-        EC.sku_madre,
-        EC.descripcion_nueva AS "descripcion",
-        EC.ref_modelo AS "modelo",
-        VMT.vmt_marca AS "marca",
-        substring(EC.categoria from 1 for 7) AS subclase,
-        M.tipo AS "tipo_programa",
-        M.fit AS "fit_estilo",
-        CO.color AS "color",
-        EC.cod_color AS "cod_color",
-        CO.color_hexa AS "color_hexa",
-        EC.talla AS "talla",
         (date_trunc('week', VT.fecha))::date AS fecha,
         SEM.n_sem,
-        SEM.ano,
         VT.cant AS "v_cant",
         0 AS "s_cant",
         VT.pvp_unit AS "v_pvp"
     FROM dbo.dwh_ventas AS VT
-    LEFT JOIN dbo.cat_sku AS EC ON VT.ean = EC.ean
-    LEFT JOIN dbo.cod_color AS CO ON EC.cod_color = CO.codigo
-    LEFT JOIN dbo.tiendas AS T ON VT.num_local = T.codigo AND T.ini_cliente = VT.ini_cliente
+    JOIN dbo.cat_sku AS EC ON VT.ean = EC.ean
+    JOIN dbo.tiendas AS T ON VT.num_local = T.codigo AND T.ini_cliente = VT.ini_cliente AND T.tipo = 'TIENDA' AND UPPER(T.local) != 'CACIQUE'
     LEFT JOIN dbo.monitoreo AS M ON EC.ref_modelo = M.modelo AND EC.marca = M.marca
     LEFT JOIN dbo.marca_subclase AS MS ON VT.ini_cliente = MS.ini_cliente AND substring(EC.categoria from 1 for 7) = MS.subcategoria
     LEFT JOIN dbo.marca AS MA ON EC.marca = MA.marca_bd
-    LEFT JOIN Valid_Marca_Tipo AS VMT ON VMT.vmt_tipo = M.tipo
+    JOIN Valid_Marca_Tipo AS VMT ON VMT.vmt_tipo = M.tipo
         AND VMT.vmt_fit IS NOT DISTINCT FROM M.fit
         AND VMT.vmt_marca = COALESCE(MS.marca, MA.new_marca, EC.marca)
-    LEFT JOIN dbo.semanas AS SEM ON (date_trunc('week', VT.fecha))::date = SEM.dia_inicio
+    JOIN dbo.semanas AS SEM ON (date_trunc('week', VT.fecha))::date = SEM.dia_inicio
     WHERE VT.ini_cliente = %(ini_cliente)s
       AND VT.fecha BETWEEN %(fecha_inicio)s AND %(fecha_fin)s
 ) AS syv
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+GROUP BY syv.local, syv.ciudad, syv.fecha, syv.n_sem
 """
 
 # ── Endpoint: marcas disponibles ──────────────────────────────────────────────
 @app.get("/api/marcas")
 def get_marcas(ini_cliente: str = Query(default="FL")):
-    """Devuelve marcas con stock >= 800 en la fecha más reciente."""
     sql = """
     SELECT DISTINCT COALESCE(MS.marca, MA.new_marca, EC.marca) AS marca
     FROM dbo.dwh_stock AS ST
@@ -192,7 +139,6 @@ def get_marcas(ini_cliente: str = Query(default="FL")):
 # ── Endpoint: tipos de programa ───────────────────────────────────────────────
 @app.get("/api/tipos_programa")
 def get_tipos_programa(marca: str = Query(...), ini_cliente: str = Query(default="FL")):
-    """Devuelve los tipos de programa disponibles para una marca en la fecha más reciente."""
     sql = """
     SELECT DISTINCT M.tipo AS tipo
     FROM dbo.monitoreo M
@@ -217,7 +163,6 @@ def get_tipos_programa(marca: str = Query(...), ini_cliente: str = Query(default
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 # ── Endpoint: consultar datos ─────────────────────────────────────────────────
 @app.get("/api/consultar")
 def consultar(
@@ -230,7 +175,6 @@ def consultar(
     ini_cliente: str = Query(default="FL"),
     stock_threshold: int = Query(default=800),
 ):
-    """Retorna dos arrays de filas (año anterior y año actual) para el dashboard."""
     try:
         fi_prev = datetime.date.fromisoformat(fecha_inicio_prev)
         ff_prev = datetime.date.fromisoformat(fecha_fin_prev)
@@ -249,7 +193,6 @@ def consultar(
             "tipo_programa": tipo_programa
         }
         
-        # Inyectar filtros en la consulta SQL dinámicamente para lograr máxima velocidad
         sql = QUERY_DATA
         marca_filter = " AND COALESCE(MS.marca, MA.new_marca, EC.marca) = %(marca)s "
         tipo_filter = "" if tipo_programa == "TODOS" else " AND M.tipo = %(tipo_programa)s "
@@ -286,26 +229,20 @@ def consultar(
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             future_prev = executor.submit(run_query, fi_prev, ff_prev)
             future_curr = executor.submit(run_query, fi_curr, ff_curr)
-            
             data_prev = future_prev.result()
             data_curr = future_curr.result()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error de consulta: {str(e)}")
 
-    # Build direct JSON response bypassing Python serialization overhead completely
     return Response(
         content='{"prev":' + data_prev + ',"curr":' + data_curr + ',"marca":"' + marca + '"}',
         media_type="application/json"
     )
-
 
 # ── Servir index.html ─────────────────────────────────────────────────────────
 @app.get("/")
 def root():
     return FileResponse("index.html")
 
-# Archivos estáticos (si los hay)
 if os.path.isdir("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Trigger reload

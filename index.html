@@ -123,6 +123,10 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
 .source-tab:hover{color:var(--text)}
 .source-tab.active{background:var(--accent);color:#fff}
 .form-group{margin-bottom:16px}
+.qs-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.qs-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;font-family:var(--font-main);transition:all .15s;flex:1;text-align:center;min-width:100px}
+.qs-btn:hover{border-color:var(--accent);color:var(--text)}
+.qs-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .form-group label{display:block;font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-input,.form-select{width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:var(--font-mono);outline:none;transition:border-color .15s}
@@ -198,6 +202,14 @@ footer{text-align:center;padding:32px 0;color:var(--text2);font-size:12px;border
     </div>
     <div class="form-group">
       <div class="form-hint" style="margin-top:4px">Marcas con stock &ge; 800 und en la &uacute;ltima fecha disponible</div>
+    </div>
+    <div class="form-group">
+      <label>Per&iacute;odo r&aacute;pido</label>
+      <div class="qs-row">
+        <button class="qs-btn" id="qs4" onclick="quickSelect(4)">&Uacute;ltimas 4 sem</button>
+        <button class="qs-btn" id="qs8" onclick="quickSelect(8)">&Uacute;ltimas 8 sem</button>
+        <button class="qs-btn" id="qsYTD" onclick="quickSelect('ytd')">A&ntilde;o a la fecha</button>
+      </div>
     </div>
     <div class="form-group">
       <label>A&ntilde;o Anterior</label>
@@ -338,7 +350,7 @@ function processData(rowsPrev, rowsCurr, brandName) {
   function aggregate(rows) {
     var map = {};
     rows.forEach(function(r) {
-      if ((r.Tipo_Tienda || '').toUpperCase() !== 'TIENDA') return;
+      
       var store = r.local || '';
       var wn = extractWeekNum(r.semanas || '');
       if (!(wn in numToIdx)) return;
@@ -689,25 +701,41 @@ function weekToDate(weekStr, weekday) {
 }
 
 function setDefaultDates() {
+  quickSelect(8);
+}
+
+function quickSelect(mode) {
+  ['qs4','qs8','qsYTD'].forEach(function(id) { document.getElementById(id).classList.remove('active'); });
+
   var now = new Date();
-  
-  // Año actual: Última semana registrada
   var currEndWeek = getWeekString(now);
-  document.getElementById('dbCurrFin').value = currEndWeek;
-  
-  // Rango 12 semanas hacia atrás
-  var startCurr = new Date(now);
-  startCurr.setDate(startCurr.getDate() - 7 * 12);
-  var currStartWeek = getWeekString(startCurr);
+  var currStartWeek, prevStartWeek, prevEndWeek;
+
+  if (mode === 'ytd') {
+    // First ISO week of current year
+    var jan4 = new Date(now.getFullYear(), 0, 4);
+    currStartWeek = now.getFullYear() + '-W01';
+    // Same week range in previous year
+    prevEndWeek = (now.getFullYear() - 1) + '-W' + currEndWeek.split('-W')[1];
+    prevStartWeek = (now.getFullYear() - 1) + '-W01';
+    document.getElementById('qsYTD').classList.add('active');
+  } else {
+    var weeks = mode; // 4 or 8
+    var startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - 7 * weeks);
+    currStartWeek = getWeekString(startDate);
+    // Previous year: same ISO weeks shifted -1 year
+    var partsEnd = currEndWeek.split('-W');
+    var partsStart = currStartWeek.split('-W');
+    prevEndWeek = (parseInt(partsEnd[0], 10) - 1) + '-W' + partsEnd[1];
+    prevStartWeek = (parseInt(partsStart[0], 10) - 1) + '-W' + partsStart[1];
+    document.getElementById('qs' + weeks).classList.add('active');
+  }
+
   document.getElementById('dbCurrInicio').value = currStartWeek;
-  
-  // Año anterior: Misma semana, año pasado (comparación Yo Y precisa)
-  var partsEnd = currEndWeek.split('-W');
-  document.getElementById('dbPrevFin').value = (parseInt(partsEnd[0], 10) - 1) + '-W' + partsEnd[1];
-  
-  var partsStart = currStartWeek.split('-W');
-  document.getElementById('dbPrevInicio').value = (parseInt(partsStart[0], 10) - 1) + '-W' + partsStart[1];
-  
+  document.getElementById('dbCurrFin').value = currEndWeek;
+  document.getElementById('dbPrevInicio').value = prevStartWeek;
+  document.getElementById('dbPrevFin').value = prevEndWeek;
   updateWeekLabels();
 }
 

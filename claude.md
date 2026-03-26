@@ -59,3 +59,35 @@ git pull
 sudo systemctl restart ventasapi
 ```
 *(No es necesario reiniciar Nginx. Bastará recargar el servicio core para que Uvicorn lance al instante a sus "Workers" detectando el nuevo código).*
+
+
+## 6. Changelog v2.0 — Optimización SQL + Quick Selects
+
+### Backend (`api.py`)
+| Aspecto | v1.1 | v2.0 |
+|---|---|---|
+| SELECT final | 23 columnas | **6 columnas** (`local`, `ciudad`, `semanas`, `cant_venta`, `cant_stock`, `pvp_prom`) |
+| GROUP BY | 20 columnas | **4 columnas** (`local`, `ciudad`, `fecha`, `n_sem`) |
+| JOIN `ecat_fala` (CF) | presente (lookup UPC) | **eliminado** (no se usa) |
+| JOIN `cod_color` (CO) | presente (nombre/hexa color) | **eliminado** (no se usa) |
+| JOIN `tiendas` | LEFT JOIN | **INNER JOIN** con `T.tipo = 'TIENDA'` |
+| JOIN `Valid_Marca_Tipo` | LEFT JOIN | **INNER JOIN** (descarta filas sin match) |
+| JOIN `semanas` | LEFT JOIN | **INNER JOIN** |
+| Filtro bodegas | ausente en SQL, hecho en JS | **en SQL** (`T.tipo = 'TIENDA'` en ambos bloques UNION) |
+| Líneas de código | 311 | **248** (-20%) |
+
+**Impacto de rendimiento esperado:**
+- PostgreSQL procesa menos columnas en el GROUP BY (4 vs 20), reduciendo memoria y tiempo de HashAggregate.
+- Se eliminan 2 JOINs completos por bloque UNION (4 JOINs menos en total), reduciendo lookups de I/O.
+- INNER JOINs descartan filas huérfanas temprano en el plan, reduciendo el volumen del UNION ALL.
+- El JSON de respuesta es ~75% más liviano (6 campos vs 23 por fila), reduciendo serialización y transferencia.
+- El frontend ya no recibe ni filtra bodegas (antes descartaba filas post-descarga).
+
+### Frontend (`index.html`)
+- **Eliminado:** Filtro `Tipo_Tienda` en JavaScript (`processData`). Ahora el SQL garantiza solo tiendas retail.
+- **Agregado:** Quick Selects con 3 botones de período rápido:
+  - **Últimas 4 semanas** — calcula semanas ISO cerradas hacia atrás, compara vs mismo rango año anterior.
+  - **Últimas 8 semanas** — ídem con 8 semanas (es el default al cargar).
+  - **Año a la fecha** — desde semana ISO 01 del año actual hasta la semana actual, vs mismo rango año anterior.
+- Los Quick Selects pre-llenan los 4 campos de semana (`input type="week"`) y el usuario puede ajustar manualmente después.
+- `processData` solo accede a los 6 campos que devuelve el API: `r.local`, `r.ciudad`, `r.semanas`, `r.cant_venta`, `r.cant_stock`, `r.pvp_prom`.
